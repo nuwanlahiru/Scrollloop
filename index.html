@@ -95,20 +95,43 @@
 
 
     <!-- JS: Main App, Three.js, Counters, Slider, Modals -->
+    <!-- THIS SCRIPT BLOCK HAS BEEN UPDATED for Mobile Touch Disable -->
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         import { CubeTextureLoader } from 'three';
 
+        // --- Custom Infinity Curve ---
+        class InfinityCurve extends THREE.Curve {
+            constructor(scale = 1) {
+                super();
+                this.scale = scale;
+            }
+            getPoint(t, optionalTarget = new THREE.Vector3()) {
+                const point = optionalTarget; const angle = t * 2 * Math.PI; const a = this.scale;
+                const sinAngle = Math.sin(angle); const cosAngle = Math.cos(angle); const sinSq = sinAngle * sinAngle;
+                const x = a * Math.sqrt(2) * cosAngle / (sinSq + 1); const y = 0;
+                const z = a * Math.sqrt(2) * cosAngle * sinAngle / (sinSq + 1);
+                return point.set(x, y, z);
+            }
+        }
+
         // --- Global Scope Variables ---
-        let scene, camera, renderer, planeMesh, controls, clock; const shaderUniforms = { uTime: { value: 0.0 }, uFrequency: { value: new THREE.Vector2(0.8, 0.5) }, uAmplitude: { value: 0.4 }, uSpeed: { value: 0.7 } }; const waveMaterial = new THREE.MeshStandardMaterial({ metalness: 0.4, roughness: 0.3, envMapIntensity: 0.8, side: THREE.DoubleSide }); let envMapLoaded = false;
+        let scene, camera, renderer, infinityMesh, controls, clock;
+        const shaderUniforms = { uTime: { value: 0.0 }, uFrequency: { value: new THREE.Vector2(0.8, 0.5) }, uAmplitude: { value: 0.4 }, uSpeed: { value: 0.7 } };
+        const infinityMaterial = new THREE.MeshStandardMaterial({ metalness: 0.6, roughness: 0.2, envMapIntensity: 0.9, side: THREE.DoubleSide });
+        let envMapLoaded = false;
+
         // --- Global Theme Function ---
-        function updateThreeJSTheme() { const accentColorHex = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim(); const color = accentColorHex || '#39ff14'; if (waveMaterial) { waveMaterial.color.setStyle(color); } }
+        function updateThreeJSTheme() {
+            const accentColorHex = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
+            const color = accentColorHex || '#39ff14';
+            if (infinityMaterial) { infinityMaterial.color.setStyle(color); }
+        }
 
         // --- DOMContentLoaded ---
         document.addEventListener('DOMContentLoaded', () => {
             const htmlElement=document.documentElement;const themeToggleButtons=document.querySelectorAll('#theme-toggle-desktop, #theme-toggle-mobile');const themeIconsLight=document.querySelectorAll('.theme-icon-light');const themeIconsDark=document.querySelectorAll('.theme-icon-dark');const backToTopButton=document.getElementById('back-to-top-btn');const mobileMenuButton=document.getElementById('mobile-menu-button');const mobileMenu=document.getElementById('mobile-menu');const mobileNavLinks=document.querySelectorAll('.mobile-nav-link');const header=document.getElementById('main-header');const animatedElements=document.querySelectorAll('.animate-on-scroll');const sections=document.querySelectorAll('main section[id]');const navLinks=document.querySelectorAll('header nav a[href^="#"]'); const body = document.body;
-             // Removed overlay ref
 
              // --- Color Morph Theme Transition ---
              const applyTheme = (theme, event = null) => { const oldTheme = htmlElement.classList.contains('dark') ? 'dark' : 'light'; if (theme === oldTheme && body.classList.contains('theme-set')) return; htmlElement.classList.remove(oldTheme); htmlElement.classList.add(theme); themeIconsLight.forEach(icon => icon.classList.toggle('hidden', theme === 'dark')); themeIconsDark.forEach(icon => icon.classList.toggle('hidden', theme === 'light')); localStorage.setItem('theme', theme); updateThreeJSTheme(); body.classList.add('theme-set'); };
@@ -116,43 +139,30 @@
              const initialTheme = htmlElement.classList.contains('dark') ? 'dark' : 'light'; localStorage.setItem('theme', initialTheme); themeIconsLight.forEach(icon => icon.classList.toggle('hidden', initialTheme === 'dark')); themeIconsDark.forEach(icon => icon.classList.toggle('hidden', initialTheme === 'light')); updateThreeJSTheme();
              themeToggleButtons.forEach(button => { button.addEventListener('click', toggleTheme); });
 
-            // --- Mobile menu interaction (Removed toggle function) ---
-            // Event listeners related to mobile-menu-button and mobileNavLinks are removed
-             // Close mobile menu if clicking outside it (if menu is open) - This listener might still be useful if you ever re-enable the toggle button.
-            document.addEventListener('click',(event)=>{
-                 if(mobileMenu && mobileMenu.classList.contains('active') && !mobileMenu.contains(event.target) && mobileMenuButton && !mobileMenuButton.contains(event.target)){
-                     // Since the button is hidden, this part is unlikely to be reached, but kept for potential future use
-                     mobileMenu.classList.remove('active');
-                      // const icon = mobileMenuButton.querySelector('i'); // Button doesn't exist visibly
-                      // icon.classList.remove('fa-times');
-                      // icon.classList.add('fa-bars');
-                 }
-             });
+            // --- Mobile menu interaction (Still inactive as button is hidden) ---
+            document.addEventListener('click',(event)=>{ if(mobileMenu && mobileMenu.classList.contains('active') && !mobileMenu.contains(event.target) && mobileMenuButton && !mobileMenuButton.contains(event.target)){ mobileMenu.classList.remove('active'); } });
 
-
-             // scroll, observer, nav highlight
+             // --- Scroll, Observer, Nav Highlight ---
             const handleScroll=()=>{backToTopButton.classList.toggle('visible',window.scrollY>400);activateNavLinkOnScroll();};window.addEventListener('scroll',handleScroll);
             const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{entry.target.classList.toggle('visible',entry.isIntersecting);});},{threshold:0.15});animatedElements.forEach(el=>observer.observe(el));
             function activateNavLinkOnScroll(){let currentSectionId='';const headerHeight=header?header.offsetHeight:80;const scrollPosition=window.scrollY+headerHeight+100;sections.forEach(section=>{if(scrollPosition>=section.offsetTop){currentSectionId=section.getAttribute('id');}});navLinks.forEach(link=>{const linkHref=link.getAttribute('href');link.classList.toggle('active',linkHref===`#${currentSectionId}`);});}activateNavLinkOnScroll();
 
-            // Stats Counter
+            // --- Stats Counter ---
             const statsSection=document.getElementById('stats'); if(statsSection){const statsAnimated=new Set();const statsObserver=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){const statItem=entry.target;const numberEl=statItem.querySelector('.stat-number');const targetId=numberEl.id;if(!statsAnimated.has(targetId)){let targetValue=0;if(targetId==='stat-projects')targetValue=150;if(targetId==='stat-clients')targetValue=85;if(targetId==='stat-experience')targetValue=5;if(targetId==='stat-satisfaction')targetValue=98;animateCounter(numberEl,targetValue,2000);statsAnimated.add(targetId);}}});},{threshold:0.5});document.querySelectorAll('#stats .stat-item').forEach(item=>{statsObserver.observe(item);});} function animateCounter(element,target,duration){let start=0;const increment=target/(duration/16);let current=0;const updateCounter=()=>{current+=increment;if(current>=target){element.textContent=target.toLocaleString();}else{element.textContent=Math.ceil(current).toLocaleString();requestAnimationFrame(updateCounter);}};requestAnimationFrame(updateCounter);}
 
-            // --- Infinite Testimonial Slider (Reverted to Slider Logic) ---
+            // --- Infinite Testimonial Slider ---
             const sliderContainer = document.querySelector('.testimonial-slider-container');
              if(sliderContainer) {
                  const slider = document.getElementById('testimonial-slider'); const prevBtn = document.getElementById('prev-testimonial'); const nextBtn = document.getElementById('next-testimonial'); let originalItems = []; let totalOriginalItems = 0; let itemsPerView = 1; let itemWidth = 0; let currentIndex = 0; let isTransitioning = false; let resizeTimeout;
                  const testimonialsData = [ { imgSeed: "portrait_woman1", quote: "The new website is not just beautiful...", cite: "Sarah K., Marketing Director" }, { imgSeed: "face_man_tech", quote: "Automating our invoicing process...", cite: "Mike P., Operations Lead" }, { imgSeed: "person_founder", quote: "From concept to launch...", cite: "David R., Startup Founder" }, { imgSeed: "portrait_professional", quote: "The AI automation increased output...", cite: "Emily B., Tech Manager" }, { imgSeed: "headshot_user", quote: "User engagement metrics shot up...", cite: "Alex T., Product Owner" }, { imgSeed: "face_business_owner", quote: "Reliable, creative, and proficient...", cite: "Chloe J., Business Owner" }, { imgSeed: "man_smiling", quote: "Their attention to detail was impressive...", cite: "Ben C., Creative Director"}, { imgSeed: "woman_corporate", quote: "The workflow automation transformed how we operate.", cite: "Olivia M., CEO"}, { imgSeed: "person_casual", quote: "Fast turnaround and excellent support.", cite: "Noah S., Project Manager"} ];
                  function calculateItemsPerView() { if (window.innerWidth < 768) return 1; if (window.innerWidth < 1024) return 2; return 3; }
-                 function populateAndSetupSlider() { if (!slider) return; isTransitioning = true; slider.style.transition = 'none'; slider.innerHTML = ''; testimonialsData.forEach(data => { const slideItem = document.createElement('div'); slideItem.className = 'testimonial-slide-item'; slideItem.innerHTML = `<div class="testimonial-card-redesigned"><img src="https://picsum.photos/seed/${data.imgSeed}/100/100" alt="${data.cite.split(',')[0]}" class="testimonial-client-img"><blockquote>${data.quote}</blockquote><cite>– ${data.cite}</cite></div>`; slider.appendChild(slideItem); }); originalItems = Array.from(slider.children); totalOriginalItems = originalItems.length; itemsPerView = calculateItemsPerView(); if (totalOriginalItems > itemsPerView) { for (let i = 0; i < itemsPerView; i++) { const indexToClone = (totalOriginalItems - itemsPerView + i + totalOriginalItems) % totalOriginalItems; const clone = originalItems[indexToClone].cloneNode(true); clone.classList.add('clone', 'prepended-clone'); slider.insertBefore(clone, slider.firstChild); } for (let i = 0; i < itemsPerView; i++) { const clone = originalItems[i % totalOriginalItems].cloneNode(true); clone.classList.add('clone', 'appended-clone'); slider.appendChild(clone); } prevBtn.style.display = 'block'; nextBtn.style.display = 'block'; } else { prevBtn.style.display = 'none'; nextBtn.style.display = 'none'; } requestAnimationFrame(() => { const firstItem = slider.querySelector('.testimonial-slide-item'); itemWidth = firstItem ? firstItem.offsetWidth : (slider.parentElement.offsetWidth / itemsPerView); currentIndex = totalOriginalItems > itemsPerView ? itemsPerView : 0; slider.style.transform = `translateX(-${currentIndex * itemWidth}px)`; setTimeout(() => { slider.style.transition = 'transform 0.5s ease-in-out'; isTransitioning = false; }, 50); }); }
-                 function slide(direction) { // Move by 1 item
-                     if (isTransitioning || totalOriginalItems <= itemsPerView) return; isTransitioning = true; currentIndex += direction; slider.style.transition = 'transform 0.5s ease-in-out'; slider.style.transform = `translateX(-${currentIndex * itemWidth}px)`;
-                 }
+                 function populateAndSetupSlider() { if (!slider) return; isTransitioning = true; slider.style.transition = 'none'; slider.innerHTML = ''; testimonialsData.forEach(data => { const slideItem = document.createElement('div'); slideItem.className = 'testimonial-slide-item'; slideItem.innerHTML = `<div class="testimonial-card-redesigned"><img loading="lazy" src="https://picsum.photos/seed/${data.imgSeed}/100/100" alt="${data.cite.split(',')[0]}" class="testimonial-client-img"><blockquote>${data.quote}</blockquote><cite>– ${data.cite}</cite></div>`; slider.appendChild(slideItem); }); originalItems = Array.from(slider.children); totalOriginalItems = originalItems.length; itemsPerView = calculateItemsPerView(); if (totalOriginalItems > itemsPerView) { for (let i = 0; i < itemsPerView; i++) { const indexToClone = (totalOriginalItems - itemsPerView + i + totalOriginalItems) % totalOriginalItems; const clone = originalItems[indexToClone].cloneNode(true); clone.classList.add('clone', 'prepended-clone'); slider.insertBefore(clone, slider.firstChild); } for (let i = 0; i < itemsPerView; i++) { const clone = originalItems[i % totalOriginalItems].cloneNode(true); clone.classList.add('clone', 'appended-clone'); slider.appendChild(clone); } prevBtn.style.display = 'block'; nextBtn.style.display = 'block'; } else { prevBtn.style.display = 'none'; nextBtn.style.display = 'none'; } requestAnimationFrame(() => { const firstItem = slider.querySelector('.testimonial-slide-item'); itemWidth = firstItem ? firstItem.offsetWidth : (slider.parentElement.offsetWidth / itemsPerView); currentIndex = totalOriginalItems > itemsPerView ? itemsPerView : 0; slider.style.transform = `translateX(-${currentIndex * itemWidth}px)`; setTimeout(() => { slider.style.transition = 'transform 0.5s ease-in-out'; isTransitioning = false; }, 50); }); }
+                 function slide(direction) { if (isTransitioning || totalOriginalItems <= itemsPerView) return; isTransitioning = true; currentIndex += direction; slider.style.transition = 'transform 0.5s ease-in-out'; slider.style.transform = `translateX(-${currentIndex * itemWidth}px)`; }
                  slider.addEventListener('transitionend', () => { if (!isTransitioning) return; const jumpNeeded = currentIndex < itemsPerView || currentIndex >= totalOriginalItems + itemsPerView; if (jumpNeeded) { slider.style.transition = 'none'; currentIndex = (currentIndex < itemsPerView) ? (currentIndex + totalOriginalItems) : (currentIndex - totalOriginalItems); slider.style.transform = `translateX(-${currentIndex * itemWidth}px)`; slider.offsetHeight; } setTimeout(() => { slider.style.transition = 'transform 0.5s ease-in-out'; isTransitioning = false; }, 0); });
                  prevBtn.addEventListener('click', () => slide(-1)); nextBtn.addEventListener('click', () => slide(1)); window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(populateAndSetupSlider, 250); }); populateAndSetupSlider();
              }
 
-            // Portfolio Modals
+            // --- Portfolio Modals ---
             const openModalButtons=document.querySelectorAll('[data-modal-target]'); const closeModalButtons=document.querySelectorAll('.modal-close-button'); const modals=document.querySelectorAll('.modal'); openModalButtons.forEach(button=>{button.addEventListener('click',()=>{const modalId=button.getAttribute('data-modal-target'); const modal=document.getElementById(modalId); if(modal){openModal(modal);}});}); closeModalButtons.forEach(button=>{button.addEventListener('click',()=>{const modal=button.closest('.modal'); if(modal){closeModal(modal);}});}); modals.forEach(modal=>{modal.addEventListener('click',(event)=>{if(event.target===modal){closeModal(modal);}});}); function openModal(modal){modal.classList.add('active'); document.body.style.overflow='hidden';} function closeModal(modal){modal.classList.remove('active'); document.body.style.overflow='';}
 
             // Initialize Main Three.js Scene
@@ -163,10 +173,101 @@
         // --- Window Load ---
         window.onload = () => { const loadingScreen = document.getElementById('loading-screen'); const body = document.body; if (loadingScreen) { loadingScreen.classList.add('loaded'); setTimeout(() => { loadingScreen.remove(); }, 600); } body.classList.add('site-revealed'); };
 
-        // --- Main Hero Three.js Logic ---
-        function initMainScene() { const container = document.getElementById('threejs-container'); if (!container) { return; } clock = new THREE.Clock(); scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000); camera.position.set(5, 1, 6); renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setSize(container.clientWidth, container.clientHeight); renderer.setPixelRatio(window.devicePixelRatio); renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0; container.appendChild(renderer.domElement); const envMapLoader = new CubeTextureLoader(); envMapLoader.load([ './placeholder-env/px.jpg', './placeholder-env/nx.jpg', './placeholder-env/py.jpg', './placeholder-env/ny.jpg', './placeholder-env/pz.jpg', './placeholder-env/nz.jpg' ], (texture) => { scene.environment = texture; envMapLoaded = true; }, undefined, (err) => { console.error("Could not load env map:", err); }); updateThreeJSTheme(); waveMaterial.onBeforeCompile = (shader) => { shader.uniforms.uTime = shaderUniforms.uTime; shader.uniforms.uFrequency = shaderUniforms.uFrequency; shader.uniforms.uAmplitude = shaderUniforms.uAmplitude; shader.uniforms.uSpeed = shaderUniforms.uSpeed; shader.vertexShader = `uniform float uTime; uniform vec2 uFrequency; uniform float uAmplitude; uniform float uSpeed;\n` + shader.vertexShader; shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>\nfloat waveX = sin(transformed.x * uFrequency.x + uTime * uSpeed);\nfloat waveZ = cos(transformed.z * uFrequency.y + uTime * uSpeed * 0.6);\nfloat waveHeight = waveX * waveZ;\ntransformed += normal * waveHeight * uAmplitude;`); }; const geometry = new THREE.PlaneGeometry(5, 5, 100, 100); geometry.rotateX(-Math.PI / 2); planeMesh = new THREE.Mesh(geometry, waveMaterial); scene.add(planeMesh); const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); scene.add(ambientLight); const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2); directionalLight.position.set(3, 5, 4); scene.add(directionalLight); const directionalLight2 = new THREE.DirectionalLight(0xaaaaff, 0.4); directionalLight2.position.set(-3, -2, -3); scene.add(directionalLight2); controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.05; controls.enableZoom = false; controls.enablePan = false; controls.autoRotate = false; controls.minPolarAngle = Math.PI / 4; controls.maxPolarAngle = 3 * Math.PI / 4; controls.target.set(0, 0, 0); controls.update(); animateMainScene(); window.addEventListener('resize', onWindowResize, false); }
-        function animateMainScene() { requestAnimationFrame(animateMainScene); const elapsedTime = clock.getElapsedTime(); shaderUniforms.uTime.value = elapsedTime; controls.update(); renderer.render(scene, camera); }
-        function onWindowResize() { const container = document.getElementById('threejs-container'); if (camera && renderer && container) { camera.aspect = container.clientWidth / container.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(container.clientWidth, container.clientHeight); } }
+        // --- Main Hero Three.js Logic (Updated for Mobile Touch Disable) ---
+        function initMainScene() {
+            const container = document.getElementById('threejs-container');
+            if (!container) { return; }
+
+            clock = new THREE.Clock();
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 3, 7);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.0;
+            container.appendChild(renderer.domElement);
+
+            const envMapLoader = new CubeTextureLoader();
+            envMapLoader.load([
+                './placeholder-env/px.jpg', './placeholder-env/nx.jpg',
+                './placeholder-env/py.jpg', './placeholder-env/ny.jpg',
+                './placeholder-env/pz.jpg', './placeholder-env/nz.jpg'
+                ], (texture) => {
+                    scene.environment = texture;
+                    envMapLoaded = true;
+                }, undefined,
+                (err) => { console.error("Could not load env map:", err); }
+            );
+
+            updateThreeJSTheme();
+
+            const curveScale = 2.5;
+            const tubularSegments = 128;
+            const radius = 0.15;
+            const radialSegments = 16;
+            const closed = true;
+            const infinityCurve = new InfinityCurve(curveScale);
+            const geometry = new THREE.TubeGeometry(infinityCurve, tubularSegments, radius, radialSegments, closed);
+            infinityMesh = new THREE.Mesh(geometry, infinityMaterial);
+            scene.add(infinityMesh);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            directionalLight.position.set(3, 5, 4);
+            scene.add(directionalLight);
+            const directionalLight2 = new THREE.DirectionalLight(0xaaaaff, 0.4);
+            directionalLight2.position.set(-3, -2, -3);
+            scene.add(directionalLight2);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.enableZoom = false;
+            controls.enablePan = false;
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.8;
+            controls.minPolarAngle = Math.PI / 3;
+            controls.maxPolarAngle = 2 * Math.PI / 3;
+            controls.target.set(0, 0, 0);
+
+            // --- MODIFIED HERE ---
+            // Disable controls initially on screens smaller than 768px
+            controls.enabled = window.innerWidth >= 768;
+            // --- END MODIFICATION ---
+
+            controls.update();
+
+            animateMainScene();
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function animateMainScene() {
+            requestAnimationFrame(animateMainScene);
+            const elapsedTime = clock.getElapsedTime();
+            shaderUniforms.uTime.value = elapsedTime;
+            controls.update(); // Needs to be called even if controls.enabled = false for autoRotate/damping
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('threejs-container');
+            if (camera && renderer && container) {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            }
+             // --- MODIFIED HERE ---
+             // Update controls enabled state on resize
+             if (controls) {
+                 controls.enabled = window.innerWidth >= 768;
+             }
+             // --- END MODIFICATION ---
+        }
         // updateThreeJSTheme function is global
 
     </script>
