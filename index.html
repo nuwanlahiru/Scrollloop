@@ -39,25 +39,25 @@
         /* --- Fix for mobile scroll over canvas --- */
         @media (max-width: 767px) {
             #threejs-container canvas {
-                pointer-events: none; /* Allows touch events to 'pass through' the canvas for scrolling */
+                pointer-events: none;
             }
         }
 
         /* --- Styles for Mobile Section Navigator --- */
         #mobile-section-nav {
-            justify-content: center; /* Center the text container */
-            touch-action: pan-y;
-            padding: 0 1rem; /* Add some padding */
+            justify-content: center;
+            /* MODIFIED: Allow vertical swipe, prioritize horizontal scroll */
+            touch-action: pan-x;
+            padding: 0 1rem;
         }
         #current-section-name-container {
              position: relative;
-             height: 1.5rem; /* Match line-height or desired clickable area */
+             height: 1.5rem;
              overflow: hidden;
-             cursor: grab;
-             active:cursor: grabbing;
-             flex-grow: 1; /* Allow it to take space */
-             max-width: 200px; /* Optional: constraint width */
-             text-align: center; /* Ensure text inside is centered */
+             cursor: ns-resize; /* Indicate vertical interaction */
+             flex-grow: 1;
+             max-width: 200px;
+             text-align: center;
         }
         .section-name-span {
             position: absolute;
@@ -78,30 +78,31 @@
             text-overflow: ellipsis;
             padding: 0 5px;
             box-sizing: border-box;
-            /* Default state: centered and transparent */
             opacity: 0;
-            transform: translateX(0);
+            /* MODIFIED: Default transform is Y now */
+            transform: translateY(0);
         }
-        /* Animation States - Start positions OFF screen */
-        .section-name-span.slide-out-left {
-            transform: translateX(-100%);
-            opacity: 0;
-        }
-        .section-name-span.slide-out-right {
-            transform: translateX(100%);
+        /* MODIFIED: Vertical Animation States */
+        .section-name-span.slide-out-up {
+            transform: translateY(-100%);
             opacity: 0;
         }
-        .section-name-span.slide-in-from-left {
-            transform: translateX(-100%);
+        .section-name-span.slide-out-down {
+            transform: translateY(100%);
             opacity: 0;
         }
-        .section-name-span.slide-in-from-right {
-            transform: translateX(100%);
+        .section-name-span.slide-in-from-up {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        .section-name-span.slide-in-from-down {
+            transform: translateY(100%);
             opacity: 0;
         }
         /* State when element is visible and centered */
         .section-name-span.active {
-            transform: translateX(0);
+            /* MODIFIED: Vertical transform */
+            transform: translateY(0);
             opacity: 1;
         }
 
@@ -109,7 +110,7 @@
         #stats { transition: background-color 0.4s ease; } #stats .stat-item { text-align: center; padding: 1rem; display: flex; flex-direction: column; align-items: center; } #stats .stat-icon { font-size: 2.5rem; color: var(--color-accent); margin-bottom: 1rem; } #stats .stat-number-container { display: inline-block; } #stats .stat-number { font-size: 2.5rem; font-weight: 700; color: var(--text-primary); display: inline; transition: color 0.4s ease;} @media (min-width: 768px) { #stats .stat-number { font-size: 3rem; } } #stats .stat-suffix { font-size: 2rem; font-weight: 700; color: var(--text-primary); display: inline; margin-left: 2px; transition: color 0.4s ease;} @media (min-width: 768px) { #stats .stat-suffix { font-size: 2.5rem; } } #stats .stat-label { font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem; transition: color 0.4s ease;} @media (min-width: 768px) { #stats .stat-label { font-size: 1rem; } }
         .process-container { border-radius: 12px; padding: 1rem; } @media(min-width: 768px) { .process-container { padding: 2rem; } } .process-item { text-align: center; padding: 1.5rem; position: relative; } @media (min-width: 768px) { .process-item:not(:last-child)::after { content: ''; position: absolute; top: 20%; bottom: 20%; right: 0; width: 1px; background-color: var(--border-color); opacity: 0.6; transition: background-color 0.4s ease;} } .process-icon { font-size: 2.5rem; color: var(--color-accent); margin-bottom: 1rem; display: block; margin-left: auto; margin-right: auto; } .process-item h4 { font-weight: 700; margin-bottom: 0.5rem; font-size: 1.1rem; } @media (min-width: 768px) { .process-item h4 { font-size: 1.15rem; } } .process-item p { font-size: 0.875rem; line-height: 1.6;} @media (min-width: 768px) { .process-item p { font-size: 0.9rem; } }
         .portfolio-item { border-radius: 12px; overflow: hidden; position: relative; transition: transform 0.3s ease, box-shadow 0.3s ease; background: var(--bg-glass); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid var(--border-glass); } .portfolio-item:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); } .dark .portfolio-item:hover { box-shadow: 0 10px 20px rgba(57, 255, 20, 0.15); } .portfolio-item img { display: block; width: 100%; height: 200px; object-fit: cover; } .portfolio-item-content { padding: 1.5rem; } .portfolio-item-content h4 { font-weight: 700; margin-bottom: 0.5rem; font-size: 1.1rem; } .portfolio-item-content p { font-size: 0.9rem; margin-bottom: 1rem; } .portfolio-item-content .details-button { font-size: 0.9rem; font-weight: 600; text-decoration: none; cursor: pointer; color: var(--text-primary); } .portfolio-item-content .details-button:hover { color: var(--color-accent); } .portfolio-item-content .details-button i { margin-left: 0.25rem; }
-        .testimonial-slider-container { position: relative; padding: 0 1rem; /* More padding on mobile for arrows */ } @media (min-width: 640px) { .testimonial-slider-container { padding: 0 50px; } } .testimonial-slider-wrapper { overflow: hidden; margin: 0; } .testimonial-slider { display: flex; } .testimonial-slide-item { flex-shrink: 0; width: 100%; padding: 0 0.5rem; /* Smaller gap */ box-sizing: border-box; } @media (min-width: 768px) { .testimonial-slide-item { width: 50%; } } @media (min-width: 1024px) { .testimonial-slide-item { width: 33.3333%; } } .testimonial-card-redesigned { height: 100%; border-radius: 12px; padding: 2rem; position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; background: var(--bg-glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--border-glass); transition: background-color 0.4s ease, border-color 0.4s ease; } .testimonial-client-img { width: 70px; height: 70px; /* Slightly smaller */ border-radius: 50%; object-fit: cover; margin-bottom: 1.5rem; border: 2px solid var(--color-accent); box-shadow: 0 4px 10px rgba(0,0,0,0.1); } .testimonial-card-redesigned blockquote { font-style: italic; margin-bottom: 1.5rem; position: relative; font-size: 1rem; line-height: 1.6; color: var(--text-primary); flex-grow: 1; max-width: 90%; } @media (min-width: 768px) { .testimonial-card-redesigned blockquote { font-size: 1.1rem; } } .testimonial-card-redesigned blockquote::before, .testimonial-card-redesigned blockquote::after { content: '"'; font-size: 2.5rem; color: var(--color-accent); opacity: 0.7; position: absolute; line-height: 0; } .testimonial-card-redesigned blockquote::before { top: -0.2em; left: -0.3em; } .testimonial-card-redesigned blockquote::after { bottom: -0.2em; right: -0.3em; } .testimonial-card-redesigned cite { font-weight: 600; font-style: normal; color: var(--text-primary); display: block; margin-top: auto; font-size: 0.9rem; }
+        .testimonial-slider-container { position: relative; padding: 0 1rem; } @media (min-width: 640px) { .testimonial-slider-container { padding: 0 50px; } } .testimonial-slider-wrapper { overflow: hidden; margin: 0; } .testimonial-slider { display: flex; } .testimonial-slide-item { flex-shrink: 0; width: 100%; padding: 0 0.5rem; box-sizing: border-box; } @media (min-width: 768px) { .testimonial-slide-item { width: 50%; } } @media (min-width: 1024px) { .testimonial-slide-item { width: 33.3333%; } } .testimonial-card-redesigned { height: 100%; border-radius: 12px; padding: 2rem; position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; background: var(--bg-glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--border-glass); transition: background-color 0.4s ease, border-color 0.4s ease; } .testimonial-client-img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 1.5rem; border: 2px solid var(--color-accent); box-shadow: 0 4px 10px rgba(0,0,0,0.1); } .testimonial-card-redesigned blockquote { font-style: italic; margin-bottom: 1.5rem; position: relative; font-size: 1rem; line-height: 1.6; color: var(--text-primary); flex-grow: 1; max-width: 90%; } @media (min-width: 768px) { .testimonial-card-redesigned blockquote { font-size: 1.1rem; } } .testimonial-card-redesigned blockquote::before, .testimonial-card-redesigned blockquote::after { content: '"'; font-size: 2.5rem; color: var(--color-accent); opacity: 0.7; position: absolute; line-height: 0; } .testimonial-card-redesigned blockquote::before { top: -0.2em; left: -0.3em; } .testimonial-card-redesigned blockquote::after { bottom: -0.2em; right: -0.3em; } .testimonial-card-redesigned cite { font-weight: 600; font-style: normal; color: var(--text-primary); display: block; margin-top: auto; font-size: 0.9rem; }
         .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); background-color: var(--color-accent); color: var(--color-dark); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.1rem; cursor: pointer; transition: background-color 0.3s ease, transform 0.2s ease; z-index: 10; } .slider-arrow:hover { background-color: var(--color-accent-hover); transform: translateY(-50%) scale(1.1); } .slider-arrow:disabled { opacity: 0.3; cursor: not-allowed; transform: translateY(-50%); } .slider-arrow.left { left: 0; } .slider-arrow.right { right: 0; } @media (min-width: 640px) { .slider-arrow.left { left: 5px; } .slider-arrow.right { right: 5px; } }
         .pricing-card-alt { border-radius: 12px; padding: 2.5rem; transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.4s ease, border-color 0.4s ease; display: flex; flex-direction: column; height: 100%; background: var(--bg-glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--border-glass); } .pricing-card-alt.popular { border-color: var(--color-accent); transform: scale(1.03); position: relative; z-index: 5; } .pricing-card-alt:hover:not(.popular) { transform: translateY(-8px); border-color: var(--color-accent); box-shadow: 0 15px 25px rgba(0,0,0,0.07); } .dark .pricing-card-alt:hover:not(.popular) { box-shadow: 0 15px 25px rgba(57, 255, 20, 0.1); } .pricing-card-alt h3 { font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary); } .pricing-card-alt .price { font-size: 2.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; } .pricing-card-alt .price-term { color: var(--text-secondary); margin-bottom: 1.5rem; } .pricing-card-alt ul { flex-grow: 1; margin-bottom: 2rem; } .pricing-card-alt ul li { margin-bottom: 0.75rem; color: var(--text-secondary); display: flex; align-items: flex-start; } .pricing-card-alt ul li i { color: var(--color-accent); margin-right: 0.75rem; margin-top: 4px; font-size: 0.9em; } .pricing-card-alt .neon-button { margin-top: auto; } .popular-badge-alt { background-color: var(--color-accent); color: var(--color-dark); padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 600; display: inline-block; margin-bottom: 1rem; }
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--modal-backdrop); display: flex; align-items: center; justify-content: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease, background-color 0.4s ease; padding: 1rem; } .modal.active { opacity: 1; visibility: visible; } .modal-content { background: var(--bg-glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--border-glass); padding: 2rem; border-radius: 12px; max-width: 800px; width: 95%; max-height: 90vh; overflow-y: auto; position: relative; transform: scale(0.95); transition: transform 0.3s ease, background-color 0.4s ease, border-color 0.4s ease; } .modal.active .modal-content { transform: scale(1); } .modal-close-button { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; color: var(--text-primary); cursor: pointer; transition: color 0.3s ease, transform 0.2s ease; } .modal-close-button:hover { color: var(--color-accent); transform: rotate(90deg); } .modal-content h3 { font-size: 1.75rem; margin-bottom: 1rem; } .modal-content img.modal-image { max-width: 100%; height: auto; border-radius: 8px; margin-bottom: 1rem; }
@@ -125,21 +126,17 @@
 
      <div id="loading-screen">
          <div class="loader-logo">Scroll<span>Loop</span></div>
-         <!-- Removed loader line -->
      </div>
-     <!-- Removed Radial Overlay -->
 
      <header id="main-header" class="fixed top-0 left-0 right-0 glass-effect">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
              <a href="#" class="text-3xl font-heading font-bold text-primary">Scroll<span style="color: var(--color-accent);">Loop</span></a>
 
-             <!-- START: Mobile Section Navigator (Arrows Removed) -->
+             <!-- START: Mobile Section Navigator (Vertical Swipe) -->
              <div id="mobile-section-nav" class="flex-grow flex items-center justify-center md:hidden mx-4 relative overflow-hidden">
-                <!-- Arrow buttons removed -->
-                <div id="current-section-name-container" class="flex-1 text-center relative h-6 overflow-hidden cursor-grab active:cursor-grabbing">
-                    <!-- Text will be injected here by JS -->
+                <div id="current-section-name-container" class="flex-1 text-center relative h-6 overflow-hidden cursor-ns-resize">
+                    <!-- Text injected by JS -->
                 </div>
-                <!-- Arrow buttons removed -->
              </div>
              <!-- END: Mobile Section Navigator -->
 
@@ -147,11 +144,10 @@
              <div class="hidden md:flex space-x-8 items-center"> <a href="#expertise" class="nav-link font-medium">Expertise</a> <a href="#stats" class="nav-link font-medium">Stats</a> <a href="#process" class="nav-link font-medium">Process</a> <a href="#portfolio" class="nav-link font-medium">Portfolio</a> <a href="#testimonials" class="nav-link font-medium">Testimonials</a> <a href="#pricing" class="nav-link font-medium">Pricing</a> <a href="#contact" class="nav-link font-medium">Contact</a> <button id="theme-toggle-desktop" class="ml-4 text-primary hover:text-neon-green transition-colors"><i class="fas fa-sun text-xl theme-icon-light hidden"></i><i class="fas fa-moon text-xl theme-icon-dark"></i></button> </div>
              <!-- Mobile Buttons -->
              <div class="md:hidden flex items-center"> <button id="theme-toggle-mobile" class="text-primary hover:text-neon-green mr-1 transition-colors"><i class="fas fa-sun text-xl theme-icon-light hidden"></i><i class="fas fa-moon text-xl theme-icon-dark"></i></button>
-                <!-- We keep the original button container but button remains hidden -->
                 <button id="mobile-menu-button" class="text-primary focus:outline-none hidden"> <i class="fas fa-bars text-2xl"></i> </button>
              </div>
          </nav>
-         <!-- Mobile Menu Panel (remains unchanged, still effectively hidden) -->
+         <!-- Mobile Menu Panel (remains hidden) -->
          <div id="mobile-menu" class="fixed top-0 right-0 bottom-0 w-64 h-screen pt-20 px-6 shadow-lg md:hidden">
             <a href="#expertise" class="block py-3 px-4 hover:text-neon-green mobile-nav-link font-medium">Expertise</a> <a href="#stats" class="block py-3 px-4 hover:text-neon-green mobile-nav-link font-medium">Stats</a> <a href="#process" class="block py-3 px-4 hover:text-neon-green mobile-nav-link font-medium">Process</a> <a href="#portfolio" class="block py-3 px-4 hover:text-neon-green mobile-nav-link font-medium">Portfolio</a> <a href="#testimonials" class="block py-3 px-4 hover:text-neon-green mobile-nav-link font-medium">Testimonials</a> <a href="#pricing" class="block py-3 px-4 hover:text-neon-green mobile-nav-link font-medium">Pricing</a> <a href="#contact" class="block py-3 px-4 hover:text-neon-green mobile-nav-link font-medium">Contact</a>
         </div>
@@ -177,7 +173,6 @@
 
 
     <!-- JS: Main App, Three.js, Counters, Slider, Modals -->
-    <!-- FINAL REFINED SCRIPT -->
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -204,13 +199,14 @@
         // --- Section Navigation Variables ---
         let sectionsData = [];
         let currentSectionIndex = -1;
-        let lastDetectedScrollIndex = -1; // Store index found during scroll events
-        let isSectionNavAnimating = false; // For text animation transition
-        let isScrollingProgrammatically = false; // For scrollIntoView transition
-        let touchStartX = 0;
-        let touchEndX = 0;
-        const swipeThreshold = 50;
-        let scrollTimeoutId = null; // To manage scroll end detection
+        let lastDetectedScrollIndex = -1;
+        let isSectionNavAnimating = false;
+        let isScrollingProgrammatically = false;
+        // MODIFIED: Use Y coordinates for vertical swipe
+        let touchStartY = 0;
+        let touchEndY = 0;
+        const swipeThreshold = 50; // Keep threshold the same for now
+        let scrollTimeoutId = null;
 
         // --- Global Theme Function ---
         function updateThreeJSTheme() {
@@ -245,24 +241,22 @@
             // --- Scroll, Observer, Nav Highlight ---
             const handleScroll=()=>{
                 backToTopButton.classList.toggle('visible',window.scrollY > 400);
-
-                // Don't interfere if a swipe/scroll animation is active
-                if (isScrollingProgrammatically || isSectionNavAnimating) return;
+                if (isScrollingProgrammatically || isSectionNavAnimating) return; // Prevent updates during transitions
 
                 lastDetectedScrollIndex = detectCurrentSectionIndex();
-                updateDesktopNavLinks(lastDetectedScrollIndex); // Update desktop links immediately
+                updateDesktopNavLinks(lastDetectedScrollIndex);
 
-                // Set timer to trigger animation AFTER scroll stops
                 clearTimeout(scrollTimeoutId);
                 scrollTimeoutId = setTimeout(() => {
                     if (lastDetectedScrollIndex !== currentSectionIndex && !isSectionNavAnimating) {
                         const direction = lastDetectedScrollIndex > currentSectionIndex ? 1 : -1;
-                        currentSectionIndex = lastDetectedScrollIndex; // Update state *after* detecting change on stop
+                        currentSectionIndex = lastDetectedScrollIndex;
+                        // Pass direction for vertical animation
                         animateSectionNameChange(sectionsData[currentSectionIndex].name, direction);
                     }
-                }, 150); // Adjust timeout for scroll stop detection
+                }, 150);
             };
-            window.addEventListener('scroll', handleScroll, { passive: true }); // Use passive listener
+            window.addEventListener('scroll', handleScroll, { passive: true });
             const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{entry.target.classList.toggle('visible',entry.isIntersecting);});},{threshold:0.15});animatedElements.forEach(el=>observer.observe(el));
 
             // --- Function to Detect Current Section Index ---
@@ -279,7 +273,7 @@
 
             // --- Function to Update Desktop Nav Links ---
              function updateDesktopNavLinks(activeIndex) {
-                 if (activeIndex === -1 || activeIndex >= sectionsData.length) return; // Check bounds
+                 if (activeIndex === -1 || activeIndex >= sectionsData.length) return;
                  const activeId = sectionsData[activeIndex].id;
                  navLinks.forEach(link => {
                      const linkHref = link.getAttribute('href');
@@ -287,28 +281,35 @@
                  });
              }
 
-            // --- Animate Section Name Change ---
+            // --- Animate Section Name Change (Handles Vertical Animation) ---
              function animateSectionNameChange(newName, direction) {
                  if (!sectionNameContainer || isSectionNavAnimating) return;
                  isSectionNavAnimating = true;
 
                  const oldSpan = sectionNameContainer.querySelector('.section-name-span.active');
                  const newSpan = document.createElement('span');
-                 newSpan.className = 'section-name-span'; // Start inactive
+                 newSpan.className = 'section-name-span';
                  newSpan.textContent = newName;
 
-                 if (direction > 0) { newSpan.classList.add('slide-in-from-right'); }
-                 else if (direction < 0) { newSpan.classList.add('slide-in-from-left'); }
-                 else { newSpan.style.opacity = '0'; } // Fallback fade
+                 // Apply VERTICAL animation classes based on direction
+                 if (direction > 0) { // Moving to Next section (scrolling down / swiping up)
+                     newSpan.classList.add('slide-in-from-down');
+                 } else if (direction < 0) { // Moving to Previous section (scrolling up / swiping down)
+                     newSpan.classList.add('slide-in-from-up');
+                 } else {
+                     newSpan.style.opacity = '0'; // Fallback fade
+                 }
                  sectionNameContainer.appendChild(newSpan);
 
                  requestAnimationFrame(() => {
-                      newSpan.classList.remove('slide-in-from-left', 'slide-in-from-right');
-                      newSpan.classList.add('active'); // Animate IN
+                      // Animate new span IN
+                      newSpan.classList.remove('slide-in-from-up', 'slide-in-from-down');
+                      newSpan.classList.add('active');
 
-                      if (oldSpan) { // Animate OUT only if oldSpan exists
-                          if (direction > 0) { oldSpan.classList.add('slide-out-left'); }
-                          else if (direction < 0) { oldSpan.classList.add('slide-out-right'); }
+                      // Animate old span OUT (if exists)
+                      if (oldSpan) {
+                          if (direction > 0) { oldSpan.classList.add('slide-out-up'); } // Moves up
+                          else if (direction < 0) { oldSpan.classList.add('slide-out-down'); } // Moves down
                           oldSpan.classList.remove('active');
                       }
                  });
@@ -322,16 +323,14 @@
              // --- Function to set the initial name without animation ---
              function setInitialSectionName(index) {
                  if (index < 0 || index >= sectionsData.length || !sectionNameContainer) return;
-                 currentSectionIndex = index; // Set the internal state
+                 currentSectionIndex = index;
                  const initialName = sectionsData[index].name;
-                 // Ensure only one active span exists
                  sectionNameContainer.querySelectorAll('.section-name-span').forEach(s => s.remove());
                  const nameSpan = document.createElement('span');
                  nameSpan.className = 'section-name-span active';
                  nameSpan.textContent = initialName;
                  sectionNameContainer.appendChild(nameSpan);
-
-                 updateDesktopNavLinks(index); // Also update desktop links
+                 updateDesktopNavLinks(index);
              }
 
             // --- Navigate Section (Called by Swipe) ---
@@ -341,32 +340,48 @@
                 const direction = targetIndex > currentSectionIndex ? 1 : -1;
                 const targetSection = sectionsData[targetIndex];
 
-                currentSectionIndex = targetIndex; // Update state FIRST
+                currentSectionIndex = targetIndex; // Update state
                 animateSectionNameChange(targetSection.name, direction); // Trigger animation
-                updateDesktopNavLinks(currentSectionIndex); // Update desktop links immediately
+                updateDesktopNavLinks(currentSectionIndex); // Update desktop links
 
                 isScrollingProgrammatically = true; // Set scroll lock
-                clearTimeout(scrollTimeoutId); // Clear scroll end timer
+                clearTimeout(scrollTimeoutId);
 
                 targetSection.element.scrollIntoView({ behavior: 'smooth' });
 
-                scrollTimeoutId = setTimeout(() => { // Set new scroll end timer
+                scrollTimeoutId = setTimeout(() => { // Release lock after scroll
                     isScrollingProgrammatically = false;
-                }, 700); // Adjust duration if needed
+                }, 700);
             }
 
-            // --- Swipe Detection on Mobile Nav ---
+            // --- MODIFIED: Vertical Swipe Detection ---
             if (mobileSectionNav) {
-                 mobileSectionNav.addEventListener('touchstart', (e) => { if (e.touches.length === 1) { touchStartX = e.touches[0].clientX; touchEndX = touchStartX; } }, { passive: true });
-                 mobileSectionNav.addEventListener('touchmove', (e) => { if (e.touches.length === 1) { touchEndX = e.touches[0].clientX; } }, { passive: true });
-                 mobileSectionNav.addEventListener('touchend', (e) => {
-                     if (touchStartX === 0 || isSectionNavAnimating || isScrollingProgrammatically) return;
-                     const deltaX = touchEndX - touchStartX;
-                     if (Math.abs(deltaX) > swipeThreshold) {
-                         if (deltaX < 0) { navigateToSection(currentSectionIndex + 1); } // Swipe Left -> Next
-                         else { navigateToSection(currentSectionIndex - 1); } // Swipe Right -> Prev
+                 mobileSectionNav.addEventListener('touchstart', (e) => {
+                     if (e.touches.length === 1) {
+                         touchStartY = e.touches[0].clientY; // Use clientY
+                         touchEndY = touchStartY;
                      }
-                     touchStartX = 0; touchEndX = 0; // Reset
+                 }, { passive: true });
+
+                 mobileSectionNav.addEventListener('touchmove', (e) => {
+                     if (e.touches.length === 1) {
+                         touchEndY = e.touches[0].clientY; // Use clientY
+                     }
+                 }, { passive: true });
+
+                 mobileSectionNav.addEventListener('touchend', (e) => {
+                     if (touchStartY === 0 || isSectionNavAnimating || isScrollingProgrammatically) return;
+
+                     const deltaY = touchEndY - touchStartY; // Calculate vertical difference
+
+                     if (Math.abs(deltaY) > swipeThreshold) { // Check vertical threshold
+                         if (deltaY < 0) { // Finger moved UPWARDS (negative deltaY)
+                             navigateToSection(currentSectionIndex + 1); // Go to NEXT section
+                         } else { // Finger moved DOWNWARDS (positive deltaY)
+                             navigateToSection(currentSectionIndex - 1); // Go to PREVIOUS section
+                         }
+                     }
+                     touchStartY = 0; touchEndY = 0; // Reset
                  });
             }
 
@@ -408,9 +423,8 @@
         function onWindowResize() {
             const container = document.getElementById('threejs-container'); if (camera && renderer && container) { camera.aspect = container.clientWidth / container.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(container.clientWidth, container.clientHeight); }
             if (controls) { controls.enabled = window.innerWidth >= 768; }
-            // On resize, detect section and set name directly (no animation needed)
             const resizeIndex = detectCurrentSectionIndex();
-            setInitialSectionName(resizeIndex); // Use the non-animating setter
+            setInitialSectionName(resizeIndex); // Update section name on resize without animation
         }
         // updateThreeJSTheme function is global
 
