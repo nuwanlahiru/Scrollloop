@@ -35,6 +35,15 @@
         .section-padding { padding-top: 5rem; padding-bottom: 5rem; } @media (min-width: 768px) { .section-padding { padding-top: 7rem; padding-bottom: 7rem; } } @media (min-width: 1024px) { .section-padding { padding-top: 8rem; padding-bottom: 8rem; } } .section-divider { border-bottom: 1px solid var(--border-color); transition: border-color 0.4s ease; }
         #hero { min-height: calc(100vh - 70px); display: flex; align-items: center; position: relative; padding-top: 6rem; padding-bottom: 4rem; } @media (min-width: 768px) { #hero { padding-top: 8rem; padding-bottom: 6rem;} } #hero h1 { font-weight: 800; line-height: 1.1; font-size: 2.75rem; /* text-4xl/5xl */ } @media (min-width: 640px) { #hero h1 { font-size: 3.5rem; } } @media (min-width: 1024px) { #hero h1 { font-size: 4.5rem; /* text-7xl */ } } #hero p { font-size: 1rem; line-height: 1.7; } @media (min-width: 768px) { #hero p { font-size: 1.125rem; /* text-lg */ } } @media (min-width: 1024px) { #hero p { font-size: 1.25rem; /* text-xl */ } }
         #threejs-container { width: 100%; max-width: 500px; height: 280px; margin: auto; cursor: grab; position: relative; overflow: hidden; } @media (min-width: 768px) { #threejs-container { height: 350px; max-width: 600px;} } @media (min-width: 1024px) { #threejs-container { height: 400px; } } #threejs-container canvas { display: block; width: 100% !important; height: 100% !important; } #threejs-container:active { cursor: grabbing; }
+
+        /* --- ADDED CSS FOR MOBILE SCROLL FIX --- */
+        @media (max-width: 767px) { /* Applies below the 'md' breakpoint (768px) */
+            #threejs-container canvas {
+                pointer-events: none; /* Allows touch events to 'pass through' the canvas for scrolling */
+            }
+        }
+        /* --- END ADDED CSS --- */
+
         .expertise-container { border-radius: 12px; padding: 1rem; } @media(min-width: 768px) { .expertise-container { padding: 2rem; } } .expertise-item { text-align: center; padding: 1.5rem; position: relative; } @media (min-width: 768px) { .expertise-item:not(:last-child)::after { content: ''; position: absolute; top: 15%; bottom: 15%; right: 0; width: 1px; background-color: var(--border-color); opacity: 0.7; transition: background-color 0.4s ease;} } .expertise-icon { font-size: 2.5rem; color: var(--color-accent); margin-bottom: 1.5rem; display: inline-block; } .expertise-item h3 { font-weight: 700; margin-bottom: 0.75rem; font-size: 1.25rem; } .expertise-item p { font-size: 0.9rem; line-height: 1.6; } @media (min-width: 768px) { .expertise-item p { font-size: 0.95rem; } }
         #stats { transition: background-color 0.4s ease; } #stats .stat-item { text-align: center; padding: 1rem; display: flex; flex-direction: column; align-items: center; } #stats .stat-icon { font-size: 2.5rem; color: var(--color-accent); margin-bottom: 1rem; } #stats .stat-number-container { display: inline-block; } #stats .stat-number { font-size: 2.5rem; font-weight: 700; color: var(--text-primary); display: inline; transition: color 0.4s ease;} @media (min-width: 768px) { #stats .stat-number { font-size: 3rem; } } #stats .stat-suffix { font-size: 2rem; font-weight: 700; color: var(--text-primary); display: inline; margin-left: 2px; transition: color 0.4s ease;} @media (min-width: 768px) { #stats .stat-suffix { font-size: 2.5rem; } } #stats .stat-label { font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem; transition: color 0.4s ease;} @media (min-width: 768px) { #stats .stat-label { font-size: 1rem; } }
         .process-container { border-radius: 12px; padding: 1rem; } @media(min-width: 768px) { .process-container { padding: 2rem; } } .process-item { text-align: center; padding: 1.5rem; position: relative; } @media (min-width: 768px) { .process-item:not(:last-child)::after { content: ''; position: absolute; top: 20%; bottom: 20%; right: 0; width: 1px; background-color: var(--border-color); opacity: 0.6; transition: background-color 0.4s ease;} } .process-icon { font-size: 2.5rem; color: var(--color-accent); margin-bottom: 1rem; display: block; margin-left: auto; margin-right: auto; } .process-item h4 { font-weight: 700; margin-bottom: 0.5rem; font-size: 1.1rem; } @media (min-width: 768px) { .process-item h4 { font-size: 1.15rem; } } .process-item p { font-size: 0.875rem; line-height: 1.6;} @media (min-width: 768px) { .process-item p { font-size: 0.9rem; } }
@@ -95,7 +104,6 @@
 
 
     <!-- JS: Main App, Three.js, Counters, Slider, Modals -->
-    <!-- THIS SCRIPT BLOCK HAS BEEN UPDATED for Mobile Touch Disable -->
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -235,10 +243,8 @@
             controls.maxPolarAngle = 2 * Math.PI / 3;
             controls.target.set(0, 0, 0);
 
-            // --- MODIFIED HERE ---
             // Disable controls initially on screens smaller than 768px
             controls.enabled = window.innerWidth >= 768;
-            // --- END MODIFICATION ---
 
             controls.update();
 
@@ -261,12 +267,10 @@
                 camera.updateProjectionMatrix();
                 renderer.setSize(container.clientWidth, container.clientHeight);
             }
-             // --- MODIFIED HERE ---
              // Update controls enabled state on resize
              if (controls) {
                  controls.enabled = window.innerWidth >= 768;
              }
-             // --- END MODIFICATION ---
         }
         // updateThreeJSTheme function is global
 
