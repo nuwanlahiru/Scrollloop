@@ -36,13 +36,74 @@
         #hero { min-height: calc(100vh - 70px); display: flex; align-items: center; position: relative; padding-top: 6rem; padding-bottom: 4rem; } @media (min-width: 768px) { #hero { padding-top: 8rem; padding-bottom: 6rem;} } #hero h1 { font-weight: 800; line-height: 1.1; font-size: 2.75rem; /* text-4xl/5xl */ } @media (min-width: 640px) { #hero h1 { font-size: 3.5rem; } } @media (min-width: 1024px) { #hero h1 { font-size: 4.5rem; /* text-7xl */ } } #hero p { font-size: 1rem; line-height: 1.7; } @media (min-width: 768px) { #hero p { font-size: 1.125rem; /* text-lg */ } } @media (min-width: 1024px) { #hero p { font-size: 1.25rem; /* text-xl */ } }
         #threejs-container { width: 100%; max-width: 500px; height: 280px; margin: auto; cursor: grab; position: relative; overflow: hidden; } @media (min-width: 768px) { #threejs-container { height: 350px; max-width: 600px;} } @media (min-width: 1024px) { #threejs-container { height: 400px; } } #threejs-container canvas { display: block; width: 100% !important; height: 100% !important; } #threejs-container:active { cursor: grabbing; }
 
-        /* --- ADDED CSS FOR MOBILE SCROLL FIX --- */
-        @media (max-width: 767px) { /* Applies below the 'md' breakpoint (768px) */
+        /* --- Fix for mobile scroll over canvas --- */
+        @media (max-width: 767px) {
             #threejs-container canvas {
                 pointer-events: none; /* Allows touch events to 'pass through' the canvas for scrolling */
             }
         }
-        /* --- END ADDED CSS --- */
+
+        /* --- Styles for Mobile Section Navigator --- */
+        #mobile-section-nav {
+            justify-content: center; /* Center the text container */
+            touch-action: pan-y;
+            padding: 0 1rem; /* Add some padding */
+        }
+        #current-section-name-container {
+             position: relative;
+             height: 1.5rem; /* Match line-height or desired clickable area */
+             overflow: hidden;
+             cursor: grab;
+             active:cursor: grabbing;
+             flex-grow: 1; /* Allow it to take space */
+             max-width: 200px; /* Optional: constraint width */
+             text-align: center; /* Ensure text inside is centered */
+        }
+        .section-name-span {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s ease;
+            will-change: transform, opacity;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 5px;
+            box-sizing: border-box;
+            /* Default state: centered and transparent */
+            opacity: 0;
+            transform: translateX(0);
+        }
+        /* Animation States - Start positions OFF screen */
+        .section-name-span.slide-out-left {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+        .section-name-span.slide-out-right {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        .section-name-span.slide-in-from-left {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+        .section-name-span.slide-in-from-right {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        /* State when element is visible and centered */
+        .section-name-span.active {
+            transform: translateX(0);
+            opacity: 1;
+        }
 
         .expertise-container { border-radius: 12px; padding: 1rem; } @media(min-width: 768px) { .expertise-container { padding: 2rem; } } .expertise-item { text-align: center; padding: 1.5rem; position: relative; } @media (min-width: 768px) { .expertise-item:not(:last-child)::after { content: ''; position: absolute; top: 15%; bottom: 15%; right: 0; width: 1px; background-color: var(--border-color); opacity: 0.7; transition: background-color 0.4s ease;} } .expertise-icon { font-size: 2.5rem; color: var(--color-accent); margin-bottom: 1.5rem; display: inline-block; } .expertise-item h3 { font-weight: 700; margin-bottom: 0.75rem; font-size: 1.25rem; } .expertise-item p { font-size: 0.9rem; line-height: 1.6; } @media (min-width: 768px) { .expertise-item p { font-size: 0.95rem; } }
         #stats { transition: background-color 0.4s ease; } #stats .stat-item { text-align: center; padding: 1rem; display: flex; flex-direction: column; align-items: center; } #stats .stat-icon { font-size: 2.5rem; color: var(--color-accent); margin-bottom: 1rem; } #stats .stat-number-container { display: inline-block; } #stats .stat-number { font-size: 2.5rem; font-weight: 700; color: var(--text-primary); display: inline; transition: color 0.4s ease;} @media (min-width: 768px) { #stats .stat-number { font-size: 3rem; } } #stats .stat-suffix { font-size: 2rem; font-weight: 700; color: var(--text-primary); display: inline; margin-left: 2px; transition: color 0.4s ease;} @media (min-width: 768px) { #stats .stat-suffix { font-size: 2.5rem; } } #stats .stat-label { font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.5rem; transition: color 0.4s ease;} @media (min-width: 768px) { #stats .stat-label { font-size: 1rem; } }
@@ -71,15 +132,27 @@
      <header id="main-header" class="fixed top-0 left-0 right-0 glass-effect">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
              <a href="#" class="text-3xl font-heading font-bold text-primary">Scroll<span style="color: var(--color-accent);">Loop</span></a>
+
+             <!-- START: Mobile Section Navigator (Arrows Removed) -->
+             <div id="mobile-section-nav" class="flex-grow flex items-center justify-center md:hidden mx-4 relative overflow-hidden">
+                <!-- Arrow buttons removed -->
+                <div id="current-section-name-container" class="flex-1 text-center relative h-6 overflow-hidden cursor-grab active:cursor-grabbing">
+                    <!-- Text will be injected here by JS -->
+                </div>
+                <!-- Arrow buttons removed -->
+             </div>
+             <!-- END: Mobile Section Navigator -->
+
              <!-- Desktop Nav Links -->
              <div class="hidden md:flex space-x-8 items-center"> <a href="#expertise" class="nav-link font-medium">Expertise</a> <a href="#stats" class="nav-link font-medium">Stats</a> <a href="#process" class="nav-link font-medium">Process</a> <a href="#portfolio" class="nav-link font-medium">Portfolio</a> <a href="#testimonials" class="nav-link font-medium">Testimonials</a> <a href="#pricing" class="nav-link font-medium">Pricing</a> <a href="#contact" class="nav-link font-medium">Contact</a> <button id="theme-toggle-desktop" class="ml-4 text-primary hover:text-neon-green transition-colors"><i class="fas fa-sun text-xl theme-icon-light hidden"></i><i class="fas fa-moon text-xl theme-icon-dark"></i></button> </div>
              <!-- Mobile Buttons -->
-             <div class="md:hidden flex items-center"> <button id="theme-toggle-mobile" class="text-primary hover:text-neon-green mr-4 transition-colors"><i class="fas fa-sun text-xl theme-icon-light hidden"></i><i class="fas fa-moon text-xl theme-icon-dark"></i></button>
-                <button id="mobile-menu-button" class="text-primary focus:outline-none hidden"> <!-- Hamburger Permanently Hidden --> <i class="fas fa-bars text-2xl"></i> </button>
+             <div class="md:hidden flex items-center"> <button id="theme-toggle-mobile" class="text-primary hover:text-neon-green mr-1 transition-colors"><i class="fas fa-sun text-xl theme-icon-light hidden"></i><i class="fas fa-moon text-xl theme-icon-dark"></i></button>
+                <!-- We keep the original button container but button remains hidden -->
+                <button id="mobile-menu-button" class="text-primary focus:outline-none hidden"> <i class="fas fa-bars text-2xl"></i> </button>
              </div>
          </nav>
-         <!-- Mobile Menu Panel -->
-        <div id="mobile-menu" class="fixed top-0 right-0 bottom-0 w-64 h-screen pt-20 px-6 shadow-lg md:hidden"> <!-- Glass effect applied directly -->
+         <!-- Mobile Menu Panel (remains unchanged, still effectively hidden) -->
+         <div id="mobile-menu" class="fixed top-0 right-0 bottom-0 w-64 h-screen pt-20 px-6 shadow-lg md:hidden">
             <a href="#expertise" class="block py-3 px-4 hover:text-neon-green mobile-nav-link font-medium">Expertise</a> <a href="#stats" class="block py-3 px-4 hover:text-neon-green mobile-nav-link font-medium">Stats</a> <a href="#process" class="block py-3 px-4 hover:text-neon-green mobile-nav-link font-medium">Process</a> <a href="#portfolio" class="block py-3 px-4 hover:text-neon-green mobile-nav-link font-medium">Portfolio</a> <a href="#testimonials" class="block py-3 px-4 hover:text-neon-green mobile-nav-link font-medium">Testimonials</a> <a href="#pricing" class="block py-3 px-4 hover:text-neon-green mobile-nav-link font-medium">Pricing</a> <a href="#contact" class="block py-3 px-4 hover:text-neon-green mobile-nav-link font-medium">Contact</a>
         </div>
      </header>
@@ -104,6 +177,7 @@
 
 
     <!-- JS: Main App, Three.js, Counters, Slider, Modals -->
+    <!-- FINAL REFINED SCRIPT -->
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -111,10 +185,7 @@
 
         // --- Custom Infinity Curve ---
         class InfinityCurve extends THREE.Curve {
-            constructor(scale = 1) {
-                super();
-                this.scale = scale;
-            }
+            constructor(scale = 1) { super(); this.scale = scale; }
             getPoint(t, optionalTarget = new THREE.Vector3()) {
                 const point = optionalTarget; const angle = t * 2 * Math.PI; const a = this.scale;
                 const sinAngle = Math.sin(angle); const cosAngle = Math.cos(angle); const sinSq = sinAngle * sinAngle;
@@ -130,6 +201,17 @@
         const infinityMaterial = new THREE.MeshStandardMaterial({ metalness: 0.6, roughness: 0.2, envMapIntensity: 0.9, side: THREE.DoubleSide });
         let envMapLoaded = false;
 
+        // --- Section Navigation Variables ---
+        let sectionsData = [];
+        let currentSectionIndex = -1;
+        let lastDetectedScrollIndex = -1; // Store index found during scroll events
+        let isSectionNavAnimating = false; // For text animation transition
+        let isScrollingProgrammatically = false; // For scrollIntoView transition
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const swipeThreshold = 50;
+        let scrollTimeoutId = null; // To manage scroll end detection
+
         // --- Global Theme Function ---
         function updateThreeJSTheme() {
             const accentColorHex = getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim();
@@ -139,36 +221,160 @@
 
         // --- DOMContentLoaded ---
         document.addEventListener('DOMContentLoaded', () => {
-            const htmlElement=document.documentElement;const themeToggleButtons=document.querySelectorAll('#theme-toggle-desktop, #theme-toggle-mobile');const themeIconsLight=document.querySelectorAll('.theme-icon-light');const themeIconsDark=document.querySelectorAll('.theme-icon-dark');const backToTopButton=document.getElementById('back-to-top-btn');const mobileMenuButton=document.getElementById('mobile-menu-button');const mobileMenu=document.getElementById('mobile-menu');const mobileNavLinks=document.querySelectorAll('.mobile-nav-link');const header=document.getElementById('main-header');const animatedElements=document.querySelectorAll('.animate-on-scroll');const sections=document.querySelectorAll('main section[id]');const navLinks=document.querySelectorAll('header nav a[href^="#"]'); const body = document.body;
+            // --- Element References ---
+            const htmlElement=document.documentElement; const themeToggleButtons=document.querySelectorAll('#theme-toggle-desktop, #theme-toggle-mobile'); const themeIconsLight=document.querySelectorAll('.theme-icon-light'); const themeIconsDark=document.querySelectorAll('.theme-icon-dark'); const backToTopButton=document.getElementById('back-to-top-btn'); const mobileMenuButton=document.getElementById('mobile-menu-button'); const mobileMenu=document.getElementById('mobile-menu'); const header=document.getElementById('main-header'); const animatedElements=document.querySelectorAll('.animate-on-scroll'); const sectionsNodeList=document.querySelectorAll('main section[id]'); const navLinks=document.querySelectorAll('header nav a[href^="#"]'); const body = document.body;
+            const mobileSectionNav = document.getElementById('mobile-section-nav');
+            const sectionNameContainer = document.getElementById('current-section-name-container');
 
-             // --- Color Morph Theme Transition ---
-             const applyTheme = (theme, event = null) => { const oldTheme = htmlElement.classList.contains('dark') ? 'dark' : 'light'; if (theme === oldTheme && body.classList.contains('theme-set')) return; htmlElement.classList.remove(oldTheme); htmlElement.classList.add(theme); themeIconsLight.forEach(icon => icon.classList.toggle('hidden', theme === 'dark')); themeIconsDark.forEach(icon => icon.classList.toggle('hidden', theme === 'light')); localStorage.setItem('theme', theme); updateThreeJSTheme(); body.classList.add('theme-set'); };
-             const toggleTheme=(event)=>{const currentTheme=htmlElement.classList.contains('dark')?'dark':'light';applyTheme(currentTheme==='dark'?'light':'dark', event);};
-             const initialTheme = htmlElement.classList.contains('dark') ? 'dark' : 'light'; localStorage.setItem('theme', initialTheme); themeIconsLight.forEach(icon => icon.classList.toggle('hidden', initialTheme === 'dark')); themeIconsDark.forEach(icon => icon.classList.toggle('hidden', initialTheme === 'light')); updateThreeJSTheme();
-             themeToggleButtons.forEach(button => { button.addEventListener('click', toggleTheme); });
+            // --- Populate Sections Data ---
+            sectionsNodeList.forEach((section) => {
+                const id = section.getAttribute('id'); let name = id.replace(/-/g, ' '); name = name.charAt(0).toUpperCase() + name.slice(1);
+                if (id === 'hero') name = 'Home'; if (id === 'testimonials') name = 'Clients';
+                sectionsData.push({ id: id, name: name, element: section });
+            });
 
-            // --- Mobile menu interaction (Still inactive as button is hidden) ---
+            // --- Color Morph Theme Transition ---
+            const applyTheme = (theme, event = null) => { const oldTheme = htmlElement.classList.contains('dark') ? 'dark' : 'light'; if (theme === oldTheme && body.classList.contains('theme-set')) return; htmlElement.classList.remove(oldTheme); htmlElement.classList.add(theme); themeIconsLight.forEach(icon => icon.classList.toggle('hidden', theme === 'dark')); themeIconsDark.forEach(icon => icon.classList.toggle('hidden', theme === 'light')); localStorage.setItem('theme', theme); updateThreeJSTheme(); body.classList.add('theme-set'); };
+            const toggleTheme=(event)=>{const currentTheme=htmlElement.classList.contains('dark')?'dark':'light';applyTheme(currentTheme==='dark'?'light':'dark', event);};
+            const initialTheme = htmlElement.classList.contains('dark') ? 'dark' : 'light'; localStorage.setItem('theme', initialTheme); themeIconsLight.forEach(icon => icon.classList.toggle('hidden', initialTheme === 'dark')); themeIconsDark.forEach(icon => icon.classList.toggle('hidden', initialTheme === 'light')); updateThreeJSTheme();
+            themeToggleButtons.forEach(button => { button.addEventListener('click', toggleTheme); });
+
+            // --- Mobile menu interaction ---
             document.addEventListener('click',(event)=>{ if(mobileMenu && mobileMenu.classList.contains('active') && !mobileMenu.contains(event.target) && mobileMenuButton && !mobileMenuButton.contains(event.target)){ mobileMenu.classList.remove('active'); } });
 
-             // --- Scroll, Observer, Nav Highlight ---
-            const handleScroll=()=>{backToTopButton.classList.toggle('visible',window.scrollY>400);activateNavLinkOnScroll();};window.addEventListener('scroll',handleScroll);
+            // --- Scroll, Observer, Nav Highlight ---
+            const handleScroll=()=>{
+                backToTopButton.classList.toggle('visible',window.scrollY > 400);
+
+                // Don't interfere if a swipe/scroll animation is active
+                if (isScrollingProgrammatically || isSectionNavAnimating) return;
+
+                lastDetectedScrollIndex = detectCurrentSectionIndex();
+                updateDesktopNavLinks(lastDetectedScrollIndex); // Update desktop links immediately
+
+                // Set timer to trigger animation AFTER scroll stops
+                clearTimeout(scrollTimeoutId);
+                scrollTimeoutId = setTimeout(() => {
+                    if (lastDetectedScrollIndex !== currentSectionIndex && !isSectionNavAnimating) {
+                        const direction = lastDetectedScrollIndex > currentSectionIndex ? 1 : -1;
+                        currentSectionIndex = lastDetectedScrollIndex; // Update state *after* detecting change on stop
+                        animateSectionNameChange(sectionsData[currentSectionIndex].name, direction);
+                    }
+                }, 150); // Adjust timeout for scroll stop detection
+            };
+            window.addEventListener('scroll', handleScroll, { passive: true }); // Use passive listener
             const observer=new IntersectionObserver((entries)=>{entries.forEach(entry=>{entry.target.classList.toggle('visible',entry.isIntersecting);});},{threshold:0.15});animatedElements.forEach(el=>observer.observe(el));
-            function activateNavLinkOnScroll(){let currentSectionId='';const headerHeight=header?header.offsetHeight:80;const scrollPosition=window.scrollY+headerHeight+100;sections.forEach(section=>{if(scrollPosition>=section.offsetTop){currentSectionId=section.getAttribute('id');}});navLinks.forEach(link=>{const linkHref=link.getAttribute('href');link.classList.toggle('active',linkHref===`#${currentSectionId}`);});}activateNavLinkOnScroll();
+
+            // --- Function to Detect Current Section Index ---
+            function detectCurrentSectionIndex() {
+                 const headerHeight = header ? header.offsetHeight : 80;
+                 const scrollPosition = window.scrollY + headerHeight + 50;
+                 let foundIndex = -1;
+                 for (let i = sectionsData.length - 1; i >= 0; i--) {
+                     if (scrollPosition >= sectionsData[i].element.offsetTop) { foundIndex = i; break; }
+                 }
+                 if (foundIndex === -1 && sectionsData.length > 0) { foundIndex = 0; }
+                 return foundIndex;
+            }
+
+            // --- Function to Update Desktop Nav Links ---
+             function updateDesktopNavLinks(activeIndex) {
+                 if (activeIndex === -1 || activeIndex >= sectionsData.length) return; // Check bounds
+                 const activeId = sectionsData[activeIndex].id;
+                 navLinks.forEach(link => {
+                     const linkHref = link.getAttribute('href');
+                     link.classList.toggle('active', linkHref === `#${activeId}`);
+                 });
+             }
+
+            // --- Animate Section Name Change ---
+             function animateSectionNameChange(newName, direction) {
+                 if (!sectionNameContainer || isSectionNavAnimating) return;
+                 isSectionNavAnimating = true;
+
+                 const oldSpan = sectionNameContainer.querySelector('.section-name-span.active');
+                 const newSpan = document.createElement('span');
+                 newSpan.className = 'section-name-span'; // Start inactive
+                 newSpan.textContent = newName;
+
+                 if (direction > 0) { newSpan.classList.add('slide-in-from-right'); }
+                 else if (direction < 0) { newSpan.classList.add('slide-in-from-left'); }
+                 else { newSpan.style.opacity = '0'; } // Fallback fade
+                 sectionNameContainer.appendChild(newSpan);
+
+                 requestAnimationFrame(() => {
+                      newSpan.classList.remove('slide-in-from-left', 'slide-in-from-right');
+                      newSpan.classList.add('active'); // Animate IN
+
+                      if (oldSpan) { // Animate OUT only if oldSpan exists
+                          if (direction > 0) { oldSpan.classList.add('slide-out-left'); }
+                          else if (direction < 0) { oldSpan.classList.add('slide-out-right'); }
+                          oldSpan.classList.remove('active');
+                      }
+                 });
+
+                 setTimeout(() => { // Cleanup
+                     if (oldSpan && oldSpan.parentNode) { oldSpan.remove(); }
+                     isSectionNavAnimating = false;
+                 }, 450);
+             }
+
+             // --- Function to set the initial name without animation ---
+             function setInitialSectionName(index) {
+                 if (index < 0 || index >= sectionsData.length || !sectionNameContainer) return;
+                 currentSectionIndex = index; // Set the internal state
+                 const initialName = sectionsData[index].name;
+                 // Ensure only one active span exists
+                 sectionNameContainer.querySelectorAll('.section-name-span').forEach(s => s.remove());
+                 const nameSpan = document.createElement('span');
+                 nameSpan.className = 'section-name-span active';
+                 nameSpan.textContent = initialName;
+                 sectionNameContainer.appendChild(nameSpan);
+
+                 updateDesktopNavLinks(index); // Also update desktop links
+             }
+
+            // --- Navigate Section (Called by Swipe) ---
+            function navigateToSection(targetIndex) {
+                if (targetIndex < 0 || targetIndex >= sectionsData.length || targetIndex === currentSectionIndex || isSectionNavAnimating || isScrollingProgrammatically) { return; }
+
+                const direction = targetIndex > currentSectionIndex ? 1 : -1;
+                const targetSection = sectionsData[targetIndex];
+
+                currentSectionIndex = targetIndex; // Update state FIRST
+                animateSectionNameChange(targetSection.name, direction); // Trigger animation
+                updateDesktopNavLinks(currentSectionIndex); // Update desktop links immediately
+
+                isScrollingProgrammatically = true; // Set scroll lock
+                clearTimeout(scrollTimeoutId); // Clear scroll end timer
+
+                targetSection.element.scrollIntoView({ behavior: 'smooth' });
+
+                scrollTimeoutId = setTimeout(() => { // Set new scroll end timer
+                    isScrollingProgrammatically = false;
+                }, 700); // Adjust duration if needed
+            }
+
+            // --- Swipe Detection on Mobile Nav ---
+            if (mobileSectionNav) {
+                 mobileSectionNav.addEventListener('touchstart', (e) => { if (e.touches.length === 1) { touchStartX = e.touches[0].clientX; touchEndX = touchStartX; } }, { passive: true });
+                 mobileSectionNav.addEventListener('touchmove', (e) => { if (e.touches.length === 1) { touchEndX = e.touches[0].clientX; } }, { passive: true });
+                 mobileSectionNav.addEventListener('touchend', (e) => {
+                     if (touchStartX === 0 || isSectionNavAnimating || isScrollingProgrammatically) return;
+                     const deltaX = touchEndX - touchStartX;
+                     if (Math.abs(deltaX) > swipeThreshold) {
+                         if (deltaX < 0) { navigateToSection(currentSectionIndex + 1); } // Swipe Left -> Next
+                         else { navigateToSection(currentSectionIndex - 1); } // Swipe Right -> Prev
+                     }
+                     touchStartX = 0; touchEndX = 0; // Reset
+                 });
+            }
 
             // --- Stats Counter ---
             const statsSection=document.getElementById('stats'); if(statsSection){const statsAnimated=new Set();const statsObserver=new IntersectionObserver((entries)=>{entries.forEach(entry=>{if(entry.isIntersecting){const statItem=entry.target;const numberEl=statItem.querySelector('.stat-number');const targetId=numberEl.id;if(!statsAnimated.has(targetId)){let targetValue=0;if(targetId==='stat-projects')targetValue=150;if(targetId==='stat-clients')targetValue=85;if(targetId==='stat-experience')targetValue=5;if(targetId==='stat-satisfaction')targetValue=98;animateCounter(numberEl,targetValue,2000);statsAnimated.add(targetId);}}});},{threshold:0.5});document.querySelectorAll('#stats .stat-item').forEach(item=>{statsObserver.observe(item);});} function animateCounter(element,target,duration){let start=0;const increment=target/(duration/16);let current=0;const updateCounter=()=>{current+=increment;if(current>=target){element.textContent=target.toLocaleString();}else{element.textContent=Math.ceil(current).toLocaleString();requestAnimationFrame(updateCounter);}};requestAnimationFrame(updateCounter);}
 
             // --- Infinite Testimonial Slider ---
-            const sliderContainer = document.querySelector('.testimonial-slider-container');
-             if(sliderContainer) {
-                 const slider = document.getElementById('testimonial-slider'); const prevBtn = document.getElementById('prev-testimonial'); const nextBtn = document.getElementById('next-testimonial'); let originalItems = []; let totalOriginalItems = 0; let itemsPerView = 1; let itemWidth = 0; let currentIndex = 0; let isTransitioning = false; let resizeTimeout;
-                 const testimonialsData = [ { imgSeed: "portrait_woman1", quote: "The new website is not just beautiful...", cite: "Sarah K., Marketing Director" }, { imgSeed: "face_man_tech", quote: "Automating our invoicing process...", cite: "Mike P., Operations Lead" }, { imgSeed: "person_founder", quote: "From concept to launch...", cite: "David R., Startup Founder" }, { imgSeed: "portrait_professional", quote: "The AI automation increased output...", cite: "Emily B., Tech Manager" }, { imgSeed: "headshot_user", quote: "User engagement metrics shot up...", cite: "Alex T., Product Owner" }, { imgSeed: "face_business_owner", quote: "Reliable, creative, and proficient...", cite: "Chloe J., Business Owner" }, { imgSeed: "man_smiling", quote: "Their attention to detail was impressive...", cite: "Ben C., Creative Director"}, { imgSeed: "woman_corporate", quote: "The workflow automation transformed how we operate.", cite: "Olivia M., CEO"}, { imgSeed: "person_casual", quote: "Fast turnaround and excellent support.", cite: "Noah S., Project Manager"} ];
-                 function calculateItemsPerView() { if (window.innerWidth < 768) return 1; if (window.innerWidth < 1024) return 2; return 3; }
-                 function populateAndSetupSlider() { if (!slider) return; isTransitioning = true; slider.style.transition = 'none'; slider.innerHTML = ''; testimonialsData.forEach(data => { const slideItem = document.createElement('div'); slideItem.className = 'testimonial-slide-item'; slideItem.innerHTML = `<div class="testimonial-card-redesigned"><img loading="lazy" src="https://picsum.photos/seed/${data.imgSeed}/100/100" alt="${data.cite.split(',')[0]}" class="testimonial-client-img"><blockquote>${data.quote}</blockquote><cite>– ${data.cite}</cite></div>`; slider.appendChild(slideItem); }); originalItems = Array.from(slider.children); totalOriginalItems = originalItems.length; itemsPerView = calculateItemsPerView(); if (totalOriginalItems > itemsPerView) { for (let i = 0; i < itemsPerView; i++) { const indexToClone = (totalOriginalItems - itemsPerView + i + totalOriginalItems) % totalOriginalItems; const clone = originalItems[indexToClone].cloneNode(true); clone.classList.add('clone', 'prepended-clone'); slider.insertBefore(clone, slider.firstChild); } for (let i = 0; i < itemsPerView; i++) { const clone = originalItems[i % totalOriginalItems].cloneNode(true); clone.classList.add('clone', 'appended-clone'); slider.appendChild(clone); } prevBtn.style.display = 'block'; nextBtn.style.display = 'block'; } else { prevBtn.style.display = 'none'; nextBtn.style.display = 'none'; } requestAnimationFrame(() => { const firstItem = slider.querySelector('.testimonial-slide-item'); itemWidth = firstItem ? firstItem.offsetWidth : (slider.parentElement.offsetWidth / itemsPerView); currentIndex = totalOriginalItems > itemsPerView ? itemsPerView : 0; slider.style.transform = `translateX(-${currentIndex * itemWidth}px)`; setTimeout(() => { slider.style.transition = 'transform 0.5s ease-in-out'; isTransitioning = false; }, 50); }); }
-                 function slide(direction) { if (isTransitioning || totalOriginalItems <= itemsPerView) return; isTransitioning = true; currentIndex += direction; slider.style.transition = 'transform 0.5s ease-in-out'; slider.style.transform = `translateX(-${currentIndex * itemWidth}px)`; }
-                 slider.addEventListener('transitionend', () => { if (!isTransitioning) return; const jumpNeeded = currentIndex < itemsPerView || currentIndex >= totalOriginalItems + itemsPerView; if (jumpNeeded) { slider.style.transition = 'none'; currentIndex = (currentIndex < itemsPerView) ? (currentIndex + totalOriginalItems) : (currentIndex - totalOriginalItems); slider.style.transform = `translateX(-${currentIndex * itemWidth}px)`; slider.offsetHeight; } setTimeout(() => { slider.style.transition = 'transform 0.5s ease-in-out'; isTransitioning = false; }, 0); });
-                 prevBtn.addEventListener('click', () => slide(-1)); nextBtn.addEventListener('click', () => slide(1)); window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(populateAndSetupSlider, 250); }); populateAndSetupSlider();
-             }
+            const sliderContainer = document.querySelector('.testimonial-slider-container'); if(sliderContainer) { const slider = document.getElementById('testimonial-slider'); const prevBtn = document.getElementById('prev-testimonial'); const nextBtn = document.getElementById('next-testimonial'); let originalItems = []; let totalOriginalItems = 0; let itemsPerView = 1; let itemWidth = 0; let currentIndex = 0; let isTransitioning = false; let resizeTimeout; const testimonialsData = [ { imgSeed: "portrait_woman1", quote: "The new website is not just beautiful...", cite: "Sarah K., Marketing Director" }, { imgSeed: "face_man_tech", quote: "Automating our invoicing process...", cite: "Mike P., Operations Lead" }, { imgSeed: "person_founder", quote: "From concept to launch...", cite: "David R., Startup Founder" }, { imgSeed: "portrait_professional", quote: "The AI automation increased output...", cite: "Emily B., Tech Manager" }, { imgSeed: "headshot_user", quote: "User engagement metrics shot up...", cite: "Alex T., Product Owner" }, { imgSeed: "face_business_owner", quote: "Reliable, creative, and proficient...", cite: "Chloe J., Business Owner" }, { imgSeed: "man_smiling", quote: "Their attention to detail was impressive...", cite: "Ben C., Creative Director"}, { imgSeed: "woman_corporate", quote: "The workflow automation transformed how we operate.", cite: "Olivia M., CEO"}, { imgSeed: "person_casual", quote: "Fast turnaround and excellent support.", cite: "Noah S., Project Manager"} ]; function calculateItemsPerView() { if (window.innerWidth < 768) return 1; if (window.innerWidth < 1024) return 2; return 3; } function populateAndSetupSlider() { if (!slider) return; isTransitioning = true; slider.style.transition = 'none'; slider.innerHTML = ''; testimonialsData.forEach(data => { const slideItem = document.createElement('div'); slideItem.className = 'testimonial-slide-item'; slideItem.innerHTML = `<div class="testimonial-card-redesigned"><img loading="lazy" src="https://picsum.photos/seed/${data.imgSeed}/100/100" alt="${data.cite.split(',')[0]}" class="testimonial-client-img"><blockquote>${data.quote}</blockquote><cite>– ${data.cite}</cite></div>`; slider.appendChild(slideItem); }); originalItems = Array.from(slider.children); totalOriginalItems = originalItems.length; itemsPerView = calculateItemsPerView(); if (totalOriginalItems > itemsPerView) { for (let i = 0; i < itemsPerView; i++) { const indexToClone = (totalOriginalItems - itemsPerView + i + totalOriginalItems) % totalOriginalItems; const clone = originalItems[indexToClone].cloneNode(true); clone.classList.add('clone', 'prepended-clone'); slider.insertBefore(clone, slider.firstChild); } for (let i = 0; i < itemsPerView; i++) { const clone = originalItems[i % totalOriginalItems].cloneNode(true); clone.classList.add('clone', 'appended-clone'); slider.appendChild(clone); } prevBtn.style.display = 'block'; nextBtn.style.display = 'block'; } else { prevBtn.style.display = 'none'; nextBtn.style.display = 'none'; } requestAnimationFrame(() => { const firstItem = slider.querySelector('.testimonial-slide-item'); itemWidth = firstItem ? firstItem.offsetWidth : (slider.parentElement.offsetWidth / itemsPerView); currentIndex = totalOriginalItems > itemsPerView ? itemsPerView : 0; slider.style.transform = `translateX(-${currentIndex * itemWidth}px)`; setTimeout(() => { slider.style.transition = 'transform 0.5s ease-in-out'; isTransitioning = false; }, 50); }); } function slide(direction) { if (isTransitioning || totalOriginalItems <= itemsPerView) return; isTransitioning = true; currentIndex += direction; slider.style.transition = 'transform 0.5s ease-in-out'; slider.style.transform = `translateX(-${currentIndex * itemWidth}px)`; } slider.addEventListener('transitionend', () => { if (!isTransitioning) return; const jumpNeeded = currentIndex < itemsPerView || currentIndex >= totalOriginalItems + itemsPerView; if (jumpNeeded) { slider.style.transition = 'none'; currentIndex = (currentIndex < itemsPerView) ? (currentIndex + totalOriginalItems) : (currentIndex - totalOriginalItems); slider.style.transform = `translateX(-${currentIndex * itemWidth}px)`; slider.offsetHeight; } setTimeout(() => { slider.style.transition = 'transform 0.5s ease-in-out'; isTransitioning = false; }, 0); }); prevBtn.addEventListener('click', () => slide(-1)); nextBtn.addEventListener('click', () => slide(1)); window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(populateAndSetupSlider, 250); }); populateAndSetupSlider(); }
 
             // --- Portfolio Modals ---
             const openModalButtons=document.querySelectorAll('[data-modal-target]'); const closeModalButtons=document.querySelectorAll('.modal-close-button'); const modals=document.querySelectorAll('.modal'); openModalButtons.forEach(button=>{button.addEventListener('click',()=>{const modalId=button.getAttribute('data-modal-target'); const modal=document.getElementById(modalId); if(modal){openModal(modal);}});}); closeModalButtons.forEach(button=>{button.addEventListener('click',()=>{const modal=button.closest('.modal'); if(modal){closeModal(modal);}});}); modals.forEach(modal=>{modal.addEventListener('click',(event)=>{if(event.target===modal){closeModal(modal);}});}); function openModal(modal){modal.classList.add('active'); document.body.style.overflow='hidden';} function closeModal(modal){modal.classList.remove('active'); document.body.style.overflow='';}
@@ -176,101 +382,35 @@
             // Initialize Main Three.js Scene
             if (document.getElementById('threejs-container')) { initMainScene(); }
 
+            // --- Initial State Setup ---
+            const initialIndex = detectCurrentSectionIndex();
+            setInitialSectionName(initialIndex); // Set initial name without animation
+
         }); // End DOMContentLoaded
 
         // --- Window Load ---
         window.onload = () => { const loadingScreen = document.getElementById('loading-screen'); const body = document.body; if (loadingScreen) { loadingScreen.classList.add('loaded'); setTimeout(() => { loadingScreen.remove(); }, 600); } body.classList.add('site-revealed'); };
 
-        // --- Main Hero Three.js Logic (Updated for Mobile Touch Disable) ---
+        // --- Main Hero Three.js Logic ---
         function initMainScene() {
-            const container = document.getElementById('threejs-container');
-            if (!container) { return; }
-
-            clock = new THREE.Clock();
-            scene = new THREE.Scene();
-
-            camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
-            camera.position.set(0, 3, 7);
-
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.0;
-            container.appendChild(renderer.domElement);
-
-            const envMapLoader = new CubeTextureLoader();
-            envMapLoader.load([
-                './placeholder-env/px.jpg', './placeholder-env/nx.jpg',
-                './placeholder-env/py.jpg', './placeholder-env/ny.jpg',
-                './placeholder-env/pz.jpg', './placeholder-env/nz.jpg'
-                ], (texture) => {
-                    scene.environment = texture;
-                    envMapLoaded = true;
-                }, undefined,
-                (err) => { console.error("Could not load env map:", err); }
-            );
-
-            updateThreeJSTheme();
-
-            const curveScale = 2.5;
-            const tubularSegments = 128;
-            const radius = 0.15;
-            const radialSegments = 16;
-            const closed = true;
-            const infinityCurve = new InfinityCurve(curveScale);
-            const geometry = new THREE.TubeGeometry(infinityCurve, tubularSegments, radius, radialSegments, closed);
-            infinityMesh = new THREE.Mesh(geometry, infinityMaterial);
-            scene.add(infinityMesh);
-
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambientLight);
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
-            directionalLight.position.set(3, 5, 4);
-            scene.add(directionalLight);
-            const directionalLight2 = new THREE.DirectionalLight(0xaaaaff, 0.4);
-            directionalLight2.position.set(-3, -2, -3);
-            scene.add(directionalLight2);
-
-            controls = new OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-            controls.enableZoom = false;
-            controls.enablePan = false;
-            controls.autoRotate = true;
-            controls.autoRotateSpeed = 0.8;
-            controls.minPolarAngle = Math.PI / 3;
-            controls.maxPolarAngle = 2 * Math.PI / 3;
-            controls.target.set(0, 0, 0);
-
-            // Disable controls initially on screens smaller than 768px
+            const container = document.getElementById('threejs-container'); if (!container) { return; }
+            clock = new THREE.Clock(); scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000); camera.position.set(0, 3, 7);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); renderer.setSize(container.clientWidth, container.clientHeight); renderer.setPixelRatio(window.devicePixelRatio); renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0; container.appendChild(renderer.domElement);
+            const envMapLoader = new CubeTextureLoader(); envMapLoader.load([ './placeholder-env/px.jpg', './placeholder-env/nx.jpg', './placeholder-env/py.jpg', './placeholder-env/ny.jpg', './placeholder-env/pz.jpg', './placeholder-env/nz.jpg' ], (texture) => { scene.environment = texture; envMapLoaded = true; }, undefined, (err) => { console.error("Could not load env map:", err); } );
+            updateThreeJSTheme(); const curveScale = 2.5; const tubularSegments = 128; const radius = 0.15; const radialSegments = 16; const closed = true; const infinityCurve = new InfinityCurve(curveScale); const geometry = new THREE.TubeGeometry(infinityCurve, tubularSegments, radius, radialSegments, closed); infinityMesh = new THREE.Mesh(geometry, infinityMaterial); scene.add(infinityMesh);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); scene.add(ambientLight); const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2); directionalLight.position.set(3, 5, 4); scene.add(directionalLight); const directionalLight2 = new THREE.DirectionalLight(0xaaaaff, 0.4); directionalLight2.position.set(-3, -2, -3); scene.add(directionalLight2);
+            controls = new OrbitControls(camera, renderer.domElement); controls.enableDamping = true; controls.dampingFactor = 0.05; controls.enableZoom = false; controls.enablePan = false; controls.autoRotate = true; controls.autoRotateSpeed = 0.8; controls.minPolarAngle = Math.PI / 3; controls.maxPolarAngle = 2 * Math.PI / 3; controls.target.set(0, 0, 0);
             controls.enabled = window.innerWidth >= 768;
-
-            controls.update();
-
-            animateMainScene();
-            window.addEventListener('resize', onWindowResize, false);
+            controls.update(); animateMainScene(); window.addEventListener('resize', onWindowResize, false);
         }
-
-        function animateMainScene() {
-            requestAnimationFrame(animateMainScene);
-            const elapsedTime = clock.getElapsedTime();
-            shaderUniforms.uTime.value = elapsedTime;
-            controls.update(); // Needs to be called even if controls.enabled = false for autoRotate/damping
-            renderer.render(scene, camera);
-        }
-
+        function animateMainScene() { requestAnimationFrame(animateMainScene); const elapsedTime = clock.getElapsedTime(); shaderUniforms.uTime.value = elapsedTime; controls.update(); renderer.render(scene, camera); }
         function onWindowResize() {
-            const container = document.getElementById('threejs-container');
-            if (camera && renderer && container) {
-                camera.aspect = container.clientWidth / container.clientHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.clientWidth, container.clientHeight);
-            }
-             // Update controls enabled state on resize
-             if (controls) {
-                 controls.enabled = window.innerWidth >= 768;
-             }
+            const container = document.getElementById('threejs-container'); if (camera && renderer && container) { camera.aspect = container.clientWidth / container.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(container.clientWidth, container.clientHeight); }
+            if (controls) { controls.enabled = window.innerWidth >= 768; }
+            // On resize, detect section and set name directly (no animation needed)
+            const resizeIndex = detectCurrentSectionIndex();
+            setInitialSectionName(resizeIndex); // Use the non-animating setter
         }
         // updateThreeJSTheme function is global
 
